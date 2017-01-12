@@ -1,0 +1,10 @@
+{
+  "train": {
+    "incoming": "Time {time}: train {train} {state} for {duration} of {task}; crew {crew} with {work_hours_left} before hogout, Q={queue_length}",
+    "outgoing": "Time {time}: train {train} {state}, Q={queue_length}"
+  },
+  "crew": {
+    "hogout": "crew {crew} hogged out during service; SERVER HOGGED",
+    "hogin": "replacement crew {crew} arrives; SERVER UNHOGGED"
+  }
+}
