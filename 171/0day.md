@@ -70,7 +70,7 @@ Vacuum world revisited
     - path cost
       - q per move (not relevant)
 
-Robitic assembly
+Robotic assembly
   - states
     - real-values coordinates of robot joint angles and parts of the object to be assembled
   - initial 0

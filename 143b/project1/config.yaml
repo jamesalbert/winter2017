@@ -3,3 +3,34 @@ resources:
   R2: 2
   R3: 3
   R4: 4
+loop_error: "`%(line_cache)s` caused the following error:"
+create_message: "%(pid)s has been created from %(running)s with priority %(priority)s"
+release_message: "resource: %(quantity)s units of %(rid)s has been released"
+request_message: "resource: %(quantity)s units of %(rid)s has been requested"
+scheduler:
+  procs:
+    blocked: []
+    ready: []
+    running: []
+  resources: {}
+  pid_table: {}
+  line_cache: ""
+  saves: []
+  event_log: []
+save:
+  pid_table: {}
+  processes: {}
+  resources: {}
+  lines: []
+  line: ""
+process:
+  pid: "%(pid)s"
+  memory: {}
+  other: {}
+  status:
+    type: "%(status_type)s"
+    list: []
+  creation_tree:
+    parent: []
+    child: []
+  priority: "%(priority)s"

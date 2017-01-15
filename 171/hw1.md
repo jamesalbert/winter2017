@@ -1,0 +1,48 @@
+Homework 1
+==========
+
+1.
+  - **intelligence**: the ability to acquire and analyze information from the environment, infer a certain, appropriate action, and execute that action reasonably.
+  - **artificial intelligence**: much like **intelligence**, but exercising those traits using a mechanical or electronic process.
+  - **agent**: an agent is the entity possessing the traits above described as intelligent; artificial or otherwise. That is to say the agent is both the entity and the traits.
+  - **logical reasoning**:
+    - Playing soccer:
+      - P: score, sportsmanship, timeouts, fouls
+      - E: school, park, backyard, generally a field
+      - A: legs, feet, torso, head, hands (goalie)
+      - S: eye sight, physical action between players
+    - Exploring the subsurface oceans of Titan:
+      - P: efficiency, distant, error in flight
+      - E: space, Saturn system, zero/low/different-gravity
+      - A: thrusters (directional, rotational)
+      - S: feedback video, radio scanning of surrounding (current distance away from surface), temperature gauges
+    - Shopping for used AI books on the Internet:
+      - P: price, savings, quality, year, version
+      - E: online, bookstore
+      - A: screen,  
+      - S: keyboard/mouse
+    - Playing a tennis match:
+      - P:
+      - E:
+      - A:
+      - S:
+    - Practicing tennis against a wall:
+      - P:
+      - E:
+      - A:
+      - S:
+    - Performing a high jump:
+      - P:
+      - E:
+      - A:
+      - S:
+    - Knitting a sweater:
+      - P:
+      - E:
+      - A:
+      - S:
+    - Bidding on an item at an auction:
+      - P:
+      - E:
+      - A:
+      - S:
