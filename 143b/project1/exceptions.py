@@ -1,8 +1,10 @@
 class Error(Exception):
     pass
 
+
 class Warning(Exception):
     pass
+
 
 class EndOfSessionException(Error):
     def __init__(self):

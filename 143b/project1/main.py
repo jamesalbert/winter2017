@@ -38,14 +38,13 @@ class Process(object):
         }
 
     def request_resource(self, rid, quantity):
+        if self['pid'] == 'init':
+            raise IndexError
         resource = scheduler.resources[rid]
         if resource['capacity'] < quantity:
             raise IndexError  # not enough resource to allocate
         elif resource['available'] < quantity:
-            self['status'] = {
-                'type': 'blocked',
-                'list': resource
-            }
+            self['status']['list'].append(resource['rid'])
             scheduler.switch_state(self, 'running', 'blocked')
             resource['waiting'].append((self['pid'], quantity))
         else:
@@ -59,10 +58,13 @@ class Process(object):
         }
 
     def release_resource(self, rid, quantity=None):
+        if self['pid'] == 'init':
+            raise IndexError
         resource = scheduler.resources[rid]
         if not self['other'].get(rid, None):
             raise IndexError  # process hasn't requested resource
         quantity = quantity or self['other'][rid]
+        print(f"freeing up {quantity}")
         resource['available'] += quantity
         del self['other'][rid]
         if resource['available'] > 0:
@@ -80,6 +82,8 @@ class Process(object):
                 proc['other'][rid] = quantity
                 resource['waiting'].remove((proc['pid'], quantity))
                 scheduler.switch_state(proc, 'blocked', 'ready')
+        print(resource.rcb)
+        print(scheduler.resources[rid].rcb)
         return conf['release_message'] % {
             'rid': rid,
             'quantity': quantity
@@ -87,13 +91,13 @@ class Process(object):
 
     def destroy_proc(self, pid):
         proc = scheduler.pid_table.get(pid, None)
+        if not proc:
+            raise Exception('pid {pid} not in pid table')
         child = proc['creation_tree']['child']
         if child:
             self.destroy_proc(child[0]['pid'])
-        if not proc:
-            raise Exception('pid {pid} not in pid table')
-        for rid in deepcopy(self['other']):
-            self.release_resource(rid)
+        for rid in list(proc['other']):
+            proc.release_resource(rid)
         state = proc['status']['type']
         proc['status']['type'] = None
         scheduler.procs[state].remove(proc)
@@ -128,6 +132,7 @@ class Process(object):
 class Resource(object):
     def __init__(self, rid, status, quantity):
         self.rcb = {
+            'rid': rid,
             'status': status,
             'capacity': quantity,
             'available': quantity,
@@ -154,6 +159,7 @@ class Scheduler(object):
         self.init = Process('init', 0, 'running')
         self.procs['running'].append(self.init)
         self.event_log.append('init process has been created')
+        self.schedule()
         return self
 
     def clean_state(self):
@@ -226,7 +232,8 @@ class Scheduler(object):
     def pretty_status(self):
         status = dict()
         for rid, res in self.resources.items():
-            status[rid] = res['status']
+            status[rid] = f"{res['capacity'] - res['available']} allocated, \
+                            {res['available']} free"  # res['status']
         for state in self.procs:
             status[state] = dict()
             for proc in self.procs[state]:
@@ -235,6 +242,10 @@ class Scheduler(object):
                     'other': proc['other'],
                     'priority': proc['priority']
                 }
+                print(proc['status'])
+                if proc['status']['type'] == 'blocked':
+                    status[state][proc['pid']]['status'] += \
+                        f" by {', '.join(proc['status']['list'])}"
         return status
 
     def log(self, message):
@@ -260,13 +271,15 @@ class Scheduler(object):
 
     def schedule(self):
         running = self.get_running_proc()
-        ready = scheduler.get_highest_proc('ready')
-        if not ready:
-            return
-        if not running or \
-           running['priority'] < ready['priority'] or \
-           running['status']['type'] != 'running':
+        ready = self.get_highest_proc('ready')
+        if not running:
+            self.switch_state(ready, 'ready', 'running')
+        elif ready and \
+            (running['priority'] < ready['priority'] or
+             running['status']['type'] != 'running'):
             self.preempt(ready, running)
+        out = f"{self.get_running_proc()['pid']} "
+        self.log(f"{out}")
 
     def parse_line(self):
         line = self.line_cache
@@ -275,8 +288,8 @@ class Scheduler(object):
             return 'end of session detected'
         if line == 'init':
             raise NewSessionWarning
-        out = f"{self.get_running_proc()['pid']} "
-        self.log(out)
+        # out = f"{self.get_running_proc()['pid']} "
+        # self.log(out)
         command, *opts = line.split(' ')
         if command in ('cr', 'req', 'rel'):
             opts[1] = int(opts[1])
@@ -325,6 +338,7 @@ class Scheduler(object):
                     continue
                 self.load_state()
                 self.load_state()
+        self.log('\n')
 
 if __name__ == '__main__':
     init()
