@@ -24,7 +24,7 @@ class Event(object):
         self.time = time
 
     def callback(self):
-        pass
+        raise NotImplementedError
 
 
 class EnterQueue(Event):
@@ -73,46 +73,10 @@ class EndService(Event):
                                       time=self.time)
 
 
-class Events(object):
-    def __init__(self):
-        self.events = []
-        self.current = 0
-        self.dispatch = {
-            'enter-queue': EnterQueue,
-            'exit-queue': ExitQueue,
-            'start-service': StartService,
-            'end-service': EndService
-        }
-
-    def schedule(self, name, **kwargs):
-        event = self.dispatch[name](**{**{'name': name}, **kwargs})
-        self.events.append(event)
-        self.sort()
-        #  event.callback()
-
-    def pop(self):
-        return self.events.pop(0)
-
-    def sort(self):
-        self.events = sorted(self.events, key=lambda x: x.time)
-
-    def __bool__(self):
-        return bool(self.events)
-
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        if self.current + 1 > len(self.events):
-            raise StopIteration
-        else:
-            self.current += 1
-            return self.events[self.current - 1]
-
-
 class FIFOQueue(object):
-    def __init__(self, values=[]):
-        self.values = values
+    def __init__(self):
+        self.values = list()
+        self.current = 0
 
     def insert(self, value):
         self.values.append(value)
@@ -122,6 +86,9 @@ class FIFOQueue(object):
             self.values.remove(value)
             return value
         return self.values.pop(index)
+
+    def sort(self):
+        pass
 
     def is_empty(self):
         return len(self) is 1
@@ -134,8 +101,41 @@ class FIFOQueue(object):
             return self.values[index]
         return None
 
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if self.current + 1 > len(self.values):
+            raise StopIteration
+        else:
+            self.current += 1
+            return self.values[self.current - 1]
+
     def __len__(self):
         return len(self.values)
+
+
+class Events(FIFOQueue):
+    def __init__(self):
+        super().__init__()
+        self.dispatch = {
+            'enter-queue': EnterQueue,
+            'exit-queue': ExitQueue,
+            'start-service': StartService,
+            'end-service': EndService
+        }
+
+    def schedule(self, name, **kwargs):
+        event = self.dispatch[name](**{**{'name': name}, **kwargs})
+        self.insert(event)
+        self.sort()
+
+    def sort(self):
+        self.values = sorted(self.values,
+                             key=lambda x: x.time)
+
+    def is_empty(self):
+        return len(self) is 0
 
 
 class Simulator(object):
@@ -144,15 +144,11 @@ class Simulator(object):
     events = Events()
     queue = FIFOQueue()
 
-    def __init__(self):
-        self.state = dict()
-
     def start(self):
         while Simulator.time <= 7200:
-            train = Train()
-            self.events.schedule('enter-queue',
-                                 train=train,
-                                 time=Simulator.time)
+            Simulator.events.schedule('enter-queue',
+                                      train=Train(),
+                                      time=Simulator.time)
             Simulator.time += expovariate(.1)
         while Simulator.events:
             event = Simulator.events.pop()
