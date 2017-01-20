@@ -40,6 +40,7 @@ from statistics import mean
 import random
 import copy
 import collections
+from itertools import combinations, cycle, product
 
 # ______________________________________________________________________________
 
@@ -613,3 +614,43 @@ class TrivialVacuumEnvironment(Environment):
     def default_location(self, thing):
         "Agents start in either location at random."
         return random.choice([loc_A, loc_B, loc_C])
+
+
+agents = (
+    ReflexVacuumAgent,
+    RandomVacuumAgent,
+    TableDrivenVacuumAgent,
+    ModelBasedVacuumAgent
+)
+
+states = set(combinations(['Clean', 'Dirty'] * 3, 3))
+locations = [(0, 0), (1, 0), (2, 0)]
+opts = list(product(states, locations))
+settings = product(agents, opts)
+coords2name = {
+    (0, 0): 'loc_A',
+    (1, 0): 'loc_B',
+    (2, 0): 'loc_C'
+}
+defaults = {
+    'loc_A': list(),
+    'loc_B': list(),
+    'loc_C': list()
+}
+
+for i, setting in enumerate(settings):
+    agent, opt = setting
+    print(f"{i+1}. {agent.__name__}")
+    states, location = opt
+    status = dict()
+    for i, loc in enumerate(locations):
+        status[loc] = states[i]
+    e = TrivialVacuumEnvironment(status)
+    print(f"  location statuses: {e.status}")
+    e.add_thing(agent(), location)
+    e.run()
+    defaults[coords2name[location]].append(e.things[0].performance)
+    print(f"  average performance over 1000 steps: {e.things[0].performance}")
+print('\nAveraging all these statistics, we get:')
+for location, performances in defaults.items():
+    print(f"  for default location, {location}, all possible configurations average out to: {sum(performances)/len(performances):.2f}")

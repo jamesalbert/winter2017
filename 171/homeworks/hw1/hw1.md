@@ -105,8 +105,8 @@ and characterize it in terms of the properties listed in Section 2.3.2
 
   S: eyes, system for tracking pass bids and sales (seeing if high bidders have already reached their max)
 
-4. run `python main.py`
-5. 
+4. run `python agents.py`
+5.
   a) A simple reflex agent can **not** be perfectly rational. Consider the case where the default location is loc_B (in the middle). It can't make a perfectly rational decision because it can't see if loc_A or loc_C is dirty and it's forced to either make a random or a default/static choice.
 
   b) A reflex agent with state on the other hand can because it can see if loc_A or loc_C is dirty.
