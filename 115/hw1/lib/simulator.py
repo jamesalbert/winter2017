@@ -13,7 +13,7 @@ class Simulator(object):
 
     def start(self):
         while self.time <= 7200:
-            self.events.schedule('enter-queue',
+            self.events.schedule('arrival',
                                  train=Train(self.time),
                                  time=self.time)
             self.time += expovariate(.1)

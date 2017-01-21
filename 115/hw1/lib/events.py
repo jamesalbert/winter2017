@@ -1,3 +1,6 @@
+from random import uniform
+
+
 class Event(object):
     def __init__(self,
                  sim=None,
@@ -41,6 +44,7 @@ class StartService(Event):
         Event.__init__(self, **kwargs)
 
     def callback(self):
+        self.train.unload_time = uniform(3.5, 4.5)
         self.sim.dock_in_use = self.train
         self.sim.events.schedule('end-service',
                                  train=self.train,
@@ -52,8 +56,30 @@ class EndService(Event):
         Event.__init__(self, **kwargs)
 
     def callback(self):
-        self.sim.dock_in_use = None
+        self.sim.events.schedule('departure',
+                                 train=self.train,
+                                 time=self.time)
         if self.sim.queue:
             self.sim.events.schedule('exit-queue',
                                      train=self.sim.queue[0],
                                      time=self.time)
+        self.sim.dock_in_use = None
+
+
+class Arrive(Event):
+    def __init__(self, **kwargs):
+        Event.__init__(self, **kwargs)
+
+    def callback(self):
+        self.sim.events.schedule('enter-queue',
+                                 train=self.train,
+                                 time=self.time)
+
+
+class Depart(Event):
+    def __init__(self, **kwargs):
+        Event.__init__(self, **kwargs)
+
+    def callback(self):
+        # gather statistics
+        pass

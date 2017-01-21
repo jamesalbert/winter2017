@@ -2,7 +2,9 @@ from .events import (
     EnterQueue,
     ExitQueue,
     StartService,
-    EndService
+    EndService,
+    Depart,
+    Arrive
 )
 
 
@@ -56,7 +58,9 @@ class Events(FIFOQueue):
             'enter-queue': EnterQueue,
             'exit-queue': ExitQueue,
             'start-service': StartService,
-            'end-service': EndService
+            'end-service': EndService,
+            'departure': Depart,
+            'arrival': Arrive
         }
 
     def schedule(self, event_type, **kwargs):
