@@ -4,9 +4,7 @@ from .events import (
     StartService,
     EndService,
     Depart,
-    Arrive,
-    Hogout,
-    Hogin
+    Arrive
 )
 
 
@@ -61,8 +59,6 @@ class Events(FIFOQueue):
             'exit-queue': ExitQueue,
             'start-service': StartService,
             'end-service': EndService,
-            'hogout': Hogout,
-            'hogin': Hogin,
             'departure': Depart,
             'arrival': Arrive
         }
@@ -76,47 +72,9 @@ class Events(FIFOQueue):
         self.insert(event)
         self.sort()
 
-    def remove(self, train=None, event_type=None):
-        if not (train or event_type):
-            return
-        to_remove = None
-        for event in self.values:
-            if event.train is train and \
-               event.type == event_type:
-                to_remove = event
-                break
-        if not to_remove:
-            return
-        self.values.remove(to_remove)
-
     def sort(self):
-        print("sorting")
         self.values = sorted(self.values,
                              key=lambda x: x.time)
-        for event in self.values[1:]:
-            index = self.values.index(event)
-            event.dt = event.time - self.values[index - 1].time
 
     def is_empty(self):
         return len(self) is 0
-
-
-class Trains(FIFOQueue):
-    def __init__(self, sim):
-        FIFOQueue.__init__(self)
-        self.sim = sim
-
-    def delay(self, hogged_train):
-        delay_time = hogged_train.crew.until_arrival
-        for event in self.sim.events:
-            event.time += delay_time
-        '''
-        index = 0
-        if hogged_train in self.values:
-            index = self.values.index(hogged_train)
-        elif hogged_train is self.sim.dock_in_use:
-            self.sim.dock_in_use.unload_time += delay_time
-            index = 0
-        for train in self.values[index:]:
-            train.unload_time += hogged_train.crew.until_arrival
-        '''
