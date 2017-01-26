@@ -3,7 +3,7 @@ import numpy as np
 from random import expovariate, seed
 from .queues import Events, Trains
 from .train import Train
-from .config import conf
+from .config import conf, schema
 
 
 class Simulator(object):
@@ -19,26 +19,9 @@ class Simulator(object):
         self.verbose = verbose
         self.queue = Trains(self)
         self.hogged_out = dict()
-        self.stats = {
-            'trains_served': int(),
-            'indv_train_count': list(),
-            'trains_in_system': dict(),
-            'start_service_time': float(),
-            'end_service_time': float(),
-            'start_hogout_time': float(),
-            'max_time_in_system': int(),
-            'time_in_system': float(),
-            'avg_time_in_queue': float(),
-            'max_trains_in_queue': int(),
-            'times_in_queue': dict(),
-            'busy': float(),
-            'idle': float(),
-            'hogged_out': float(),
-            'final_time': float()
-        }
+        self.stats = schema['stats']
 
     def start(self):
-        # seed(15)
         while self.time <= self.limit:
             self.events.schedule('arrival',
                                  train=Train(self.time),
@@ -55,78 +38,49 @@ class Simulator(object):
                 self.stats['final_time'] = event.time
         return self
 
-    def keep_track(self, state, train, duration):
+    def keep_track(self, state, train, duration, always=False):
         if state == 'hogged_out':
             if train.id not in self.hogged_out:
                 self.hogged_out[train.id] = 1
             else:
                 self.hogged_out[train.id] += 1
-        if train is self.dock_in_use:
+        if state == 'queue':
+            if train.id in self.stats[state]:
+                start = self.stats[state][train.id]
+                self.stats[state][train.id] = duration - start
+            else:
+                self.stats[state][train.id] = duration
+            return
+        if always or train is self.dock_in_use:
             self.stats[state] += duration
 
     def gather_statistics(self, event):
-        ''' A big mess :(
-
-        let's break it down...
-                            ___                                          ___
-         __________________/  /                       __________________/  /
-        | _    _______    /  /                       | _    _______    /  /
-        |(_) .d########b.//)| _____________________ |(_) .d########b.//)|
-        |  .d############//  ||        _____        ||  .d############//  |
-        | .d######""####//b. ||() ||  [JAMES]  || ()|| .d######""####//b. |
-        | 9######(  )#_//##P ||()|__|  | = |  |__|()|| 9######(  )#_//##P |
-        | 'b######++#/_/##d' ||() ||   | = |   || ()|| 'b######++#/_/##d' |
-        |  "9############P"  ||   ||   |___|   ||   ||  "9############P"  |
-        |  _"9a#######aP"    ||  _   _____..__   _  ||  _"9a#######aP"    |
-        | |_|  `""""''       || (_) |_____||__| (_) || |_|  `""""''       |
-        |  ___..___________  ||_____________________||  ___..___________  |
-        | |___||___________| |                       | |___||___________| |
-        |____________________|                       |____________________|
-        '''
-
-        '''
-        this part gathers percentages of time in dock as:
-            - busy
-            - idle
-            - hogged out
-        '''
+        # busy, idle, and hogged out stats
         if event.type == 'start-service':
             # service started, keep track of how long
-            self.stats['start_service_time'] = event.time
+            self.stats['start_service'] = event.time
         elif event.type == 'end-service':
             # service ended, add time dock was busy
-            self.stats['end_service_time'] = event.time
+            self.stats['end_service'] = event.time
         elif event.type == 'hogout' and event.train is self.dock_in_use:
             # service was ended due to hogged out crew
             # stop tracking service time and add the time
             # it was busy for
-            self.stats['end_service_time'] = event.time
+            self.stats['end_service'] = event.time
         elif event.type == 'hogin' and event.train is self.dock_in_use:
             # service started again due to hogin
             # start tracking service time again
-            self.stats['start_service_time'] = event.time
-        end_service_time = self.stats['end_service_time']
-        start_service_time = self.stats['start_service_time']
-        if end_service_time >= start_service_time and \
-           event.time - event.dt > end_service_time:
+            self.stats['start_service'] = event.time
+        end_service = self.stats['end_service']
+        start_service = self.stats['start_service']
+        if end_service >= start_service and \
+           event.time - event.dt > end_service:
             self.stats['idle'] += event.dt
 
-        '''
-        Gathering max statistics is easy. For each event,
-        check if the amount of trains in system/queue is
-        greater than anything we've seen yet in the sim.
-        '''
+        # find queue max
         trains_in_queue = len(self.queue)
-        max_trains_in_queue = self.stats['max_trains_in_queue']
-        self.stats['max_trains_in_queue'] = max(trains_in_queue,
-                                                max_trains_in_queue)
-
-        if event.type == 'enter-queue':
-            self.stats['times_in_queue'][str(event.train.id)] = event.time
-        elif event.type == 'exit-queue':
-            time_entered = self.stats['times_in_queue'][str(event.train.id)]
-            time_spent = event.time - time_entered
-            self.stats['times_in_queue'][str(event.train.id)] = time_spent
+        max_queue = self.stats['max_queue']
+        self.stats['max_queue'] = max(trains_in_queue, max_queue)
 
     def plot_histogram(self):
         '''histogram'''
@@ -137,24 +91,35 @@ class Simulator(object):
         plt.title("Hogging Out Frequences")
         plt.show()
 
-    def analyze(self):
-        '''system statistics'''
-        time_in_system = float()
-        self.stats['max_time_in_system'] = max(
-            self.stats['trains_in_system'].values()
-        )
-        for _, stats in self.stats['trains_in_system'].items():
-            time_in_system += stats
-        time_in_system /= len(self.stats['trains_in_system'].keys())
-        self.stats['time_in_system'] = time_in_system
-
+    def get_queue_stats(self):
         '''queue statistics'''
-        times_in_queue = self.stats['times_in_queue'].values()
+        times_in_queue = self.stats['queue'].values()
         total_time_in_queue = sum(times_in_queue)
         number_of_time_in_queue = len(times_in_queue)
-        self.stats['avg_time_in_queue'] = total_time_in_queue / number_of_time_in_queue
+        self.stats['avg_queue'] = total_time_in_queue / number_of_time_in_queue
         for dock_state in ('idle', 'busy', 'hogged_out'):
             self.stats[dock_state] /= self.stats['final_time']
             self.stats[dock_state] *= 100
+
+    def get_system_stats(self):
+        '''system statistics'''
+        avg_time = float()
+        self.stats['max_time'] = max(
+            self.stats['trains'].values()
+        )
+        for _, time in self.stats['trains'].items():
+            avg_time += time
+        avg_time /= len(self.stats['trains'])
+        self.stats['avg_time'] = avg_time
+
+    def get_stats(self):
+        self.get_system_stats()
+        self.get_queue_stats()
+
+    def print_stats(self):
         print(conf['stats'].format(**self.stats))
+
+    def analyze(self):
+        self.get_stats()
+        self.print_stats()
         self.plot_histogram()

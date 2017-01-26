@@ -22,6 +22,7 @@ class EnterQueue(Event):
         Event.__init__(self, **kwargs)
 
     def callback(self):
+        self.sim.keep_track('queue', self.train, self.time)
         self.sim.queue.insert(self.train)
         if not self.sim.dock_in_use:
             self.sim.events.schedule('exit-queue',
@@ -34,6 +35,7 @@ class ExitQueue(Event):
         Event.__init__(self, **kwargs)
 
     def callback(self):
+        self.sim.keep_track('queue', self.train, self.time)
         train = self.sim.queue.pop()
         self.sim.events.schedule('start-service',
                                  train=train,
@@ -95,8 +97,7 @@ class Hogin(Event):
         Event.__init__(self, **kwargs)
 
     def callback(self):
-        self.train.crew.request_crew()
-        self.sim.queue.delay(self.train)
+        pass
 
 
 class Arrive(Event):
@@ -104,11 +105,12 @@ class Arrive(Event):
         Event.__init__(self, **kwargs)
 
     def callback(self):
-        self.sim.stats['trains_in_system'][self.train.id] = self.time
+        time = self.time + self.train.crew.hours_left
+        self.sim.stats['trains'][self.train.id] = self.time
         self.train.unload_time = uniform(3.5, 4.5)
         self.sim.events.schedule('hogout',
                                  train=self.train,
-                                 time=self.time + self.train.crew.hours_left)
+                                 time=time)
         self.sim.events.schedule('enter-queue',
                                  train=self.train,
                                  time=self.time)
@@ -119,8 +121,6 @@ class Depart(Event):
         Event.__init__(self, **kwargs)
 
     def callback(self):
-        start = self.sim.stats['trains_in_system'][self.train.id]
-        self.sim.stats['trains_in_system'][self.train.id] = self.time - start
-        self.sim.stats['trains_served'] += 1
-        # gather statistics
-        pass
+        start = self.sim.stats['trains'][self.train.id]
+        self.sim.stats['trains'][self.train.id] = self.time - start
+        self.sim.stats['served'] += 1

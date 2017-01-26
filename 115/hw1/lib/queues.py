@@ -27,9 +27,6 @@ class FIFOQueue(object):
     def sort(self):
         pass
 
-    def is_empty(self):
-        return len(self) is 1
-
     def __bool__(self):
         return bool(self.values)
 
@@ -39,14 +36,17 @@ class FIFOQueue(object):
         return None
 
     def __iter__(self):
-        return self
+        return iter(self.values)
 
     def __next__(self):
-        if self.current + 1 > len(self.values):
+        if self.current + 1 > len(self):
             raise StopIteration
         else:
             self.current += 1
-            return self.values[self.current - 1]
+            return self[self.current - 1]
+
+    def next(self):
+        return self.__next__()
 
     def __len__(self):
         return len(self.values)
@@ -90,19 +90,7 @@ class Events(FIFOQueue):
             return
         self.values.remove(to_remove)
 
-    def chunks(self, l, n):
-        for i in range(0, len(l), n):
-            yield l[i:i + n]
-
     def apply_dt(self, events):
-        '''
-        Applies the delta time to each event
-
-        Uses a divide-and-conquer method to break up
-        the list of events, and calculates the difference
-        in time between the start to two sequentially ordered
-        events.
-        '''
         if len(events) is 2:
             events[1].dt = events[1].time - events[0].time
             return events
@@ -119,9 +107,6 @@ class Events(FIFOQueue):
                              key=lambda x: x.time)
         self.values = self.apply_dt(self.values)
 
-    def is_empty(self):
-        return len(self) is 0
-
 
 class Trains(FIFOQueue):
     def __init__(self, sim):
@@ -131,4 +116,10 @@ class Trains(FIFOQueue):
     def delay(self, hogged_train):
         delay_time = hogged_train.crew.until_arrival
         for event in self.sim.events.values:
+            if hogged_train.id > event.train.id:
+                continue
+            elif event.type in ('hogout', 'hogin'):
+                continue
+            elif event.type in ('arrival'):
+                break
             event.time += delay_time
