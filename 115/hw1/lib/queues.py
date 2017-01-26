@@ -75,6 +75,7 @@ class Events(FIFOQueue):
         event = self.dispatch[event_type](**kwargs)
         self.insert(event)
         self.sort()
+        self.sim.num_events += 1
 
     def remove(self, train=None, event_type=None):
         if not (train or event_type):
@@ -89,13 +90,34 @@ class Events(FIFOQueue):
             return
         self.values.remove(to_remove)
 
+    def chunks(self, l, n):
+        for i in range(0, len(l), n):
+            yield l[i:i + n]
+
+    def apply_dt(self, events):
+        '''
+        Applies the delta time to each event
+
+        Uses a divide-and-conquer method to break up
+        the list of events, and calculates the difference
+        in time between the start to two sequentially ordered
+        events.
+        '''
+        if len(events) is 2:
+            events[1].dt = events[1].time - events[0].time
+            return events
+        elif len(events) < 2:
+            return events
+        length = len(events)
+        left = self.apply_dt(events[0:length // 2])
+        right = self.apply_dt(events[length // 2:length])
+        right[0].dt = right[0].time - left[-1].time
+        return left + right
+
     def sort(self):
-        print("sorting")
         self.values = sorted(self.values,
                              key=lambda x: x.time)
-        for event in self.values[1:]:
-            index = self.values.index(event)
-            event.dt = event.time - self.values[index - 1].time
+        self.values = self.apply_dt(self.values)
 
     def is_empty(self):
         return len(self) is 0
@@ -108,15 +130,5 @@ class Trains(FIFOQueue):
 
     def delay(self, hogged_train):
         delay_time = hogged_train.crew.until_arrival
-        for event in self.sim.events:
+        for event in self.sim.events.values:
             event.time += delay_time
-        '''
-        index = 0
-        if hogged_train in self.values:
-            index = self.values.index(hogged_train)
-        elif hogged_train is self.sim.dock_in_use:
-            self.sim.dock_in_use.unload_time += delay_time
-            index = 0
-        for train in self.values[index:]:
-            train.unload_time += hogged_train.crew.until_arrival
-        '''

@@ -7,5 +7,5 @@ conf = {
     'departure': 'Time {time:.2f}: train {train.id} is departing',
     'hogout': 'Time {time:.2f}: train {train.id}\'s crew has hogged out. Next crew arrives in {train.crew.until_arrival:.2f}h',
     'hogin': 'Time {time:.2f}: train {train.id}\'s new crew has just arrived with {train.crew.hours_left:.2f}h before hogout',
-    'stats': '--- Stats\ntrains served: {trains_served}\naverage # trains in system: {avg_trains_in_system:.2f}\nmax # trains in system: {max_trains_in_system}\n{trains_in_system_detail}total dock idle: {idle:.2f}%\ntotal dock busy: {busy:.2f}%\ntotal dock hogged-out: {hogged_out:.2f}%'
+    'stats': '--- Stats\ntrains served: {trains_served}\naverage time train is in system: {time_in_system:.2f}h\nmax time train is in system: {max_time_in_system:.2f}h\ntotal dock idle: {idle:.2f}%\ntotal dock busy: {busy:.2f}%\ntotal dock hogged-out: {hogged_out:.2f}%\nmaximum # trains in queue: {max_trains_in_queue} trains\naverage time in queue: {avg_time_in_queue:.2f}h'
 }

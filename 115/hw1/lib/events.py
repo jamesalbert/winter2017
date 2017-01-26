@@ -46,9 +46,12 @@ class StartService(Event):
 
     def callback(self):
         self.sim.dock_in_use = self.train
+        time = self.time + self.train.unload_time
+        duration = self.train.unload_time
+        self.sim.keep_track('busy', self.train, duration)
         self.sim.events.schedule('end-service',
                                  train=self.train,
-                                 time=self.time + self.train.unload_time)
+                                 time=time)
 
 
 class EndService(Event):
@@ -74,11 +77,17 @@ class Hogout(Event):
 
     def callback(self):
         # add time it takes for new crew to arrival to all trains
+        time = self.time + self.train.crew.until_arrival
+        duration = self.train.crew.until_arrival
+        self.sim.keep_track('hogged_out', self.train, duration)
         self.train.crew.request_crew()
         self.sim.queue.delay(self.train)
+        self.sim.events.schedule('hogout',
+                                 train=self.train,
+                                 time=self.time + self.train.crew.hours_left)
         self.sim.events.schedule('hogin',
                                  train=self.train,
-                                 time=self.time + self.train.crew.until_arrival)
+                                 time=time)
 
 
 class Hogin(Event):
@@ -95,6 +104,7 @@ class Arrive(Event):
         Event.__init__(self, **kwargs)
 
     def callback(self):
+        self.sim.stats['trains_in_system'][self.train.id] = self.time
         self.train.unload_time = uniform(3.5, 4.5)
         self.sim.events.schedule('hogout',
                                  train=self.train,
@@ -109,6 +119,8 @@ class Depart(Event):
         Event.__init__(self, **kwargs)
 
     def callback(self):
+        start = self.sim.stats['trains_in_system'][self.train.id]
+        self.sim.stats['trains_in_system'][self.train.id] = self.time - start
         self.sim.stats['trains_served'] += 1
         # gather statistics
         pass
