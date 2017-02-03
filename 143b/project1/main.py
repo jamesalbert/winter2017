@@ -8,7 +8,7 @@ Usage:
   ./main.py --input=<file> --debug
 
 Options:
-  --debug  walk through execution step by step.
+  --input  file to read.
 '''
 
 from copy import deepcopy
