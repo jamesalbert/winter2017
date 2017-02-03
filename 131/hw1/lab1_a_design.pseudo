@@ -1,0 +1,51 @@
+fork: struct {
+  taken: boolean,
+  id: int
+} fork1(taken=false, id=1),
+  fork2(taken=false, id=2),
+  fork3(taken=false, id=3)
+
+
+philosopher: struct {
+  done: boolean
+}
+
+
+function get_forks(id: int) {
+  forks_to_return: array of forks
+  for fork in forks {
+    if fork.id == id or
+       fork.id + 1 % num_threads == id + 1 % num_threads {
+      forks_to_return.append(fork)
+    }
+  }
+  return forks_to_return
+}
+
+function create_philosopher() {
+  phil = philosopher(done=false)
+  courses = 3
+  while !phil.done {
+    if !(fork1.taken or fork2.taken) {
+      fork1, fork2 = get_forks(phil.id)
+      fork1.taken = true
+      fork2.taken = true
+      sleep(1)
+      courses -= 1
+      fork1.taken = false
+      fork2.taken = false
+      if courses == 0 {
+        phil.done = true
+      }
+    }
+  }
+}
+
+function main(num_threads: int) {
+  forks = array of forks
+  philosophers = array of structs
+  for i = 0..num_threads {
+    pthread_create(philosophers, create_philosopher)
+  }
+  pthread_exit()
+}

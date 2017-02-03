@@ -24,13 +24,13 @@ save:
   lines: []
   line: ""
 process:
-  pid: "%(pid)s"
+  pid:
   memory: {}
   other: {}
   status:
-    type: "%(status_type)s"
+    type:
     list: []
   creation_tree:
     parent: []
     child: []
-  priority: "%(priority)s"
+  priority:

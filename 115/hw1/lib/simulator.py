@@ -1,9 +1,8 @@
-import matplotlib.pyplot as plt
-import numpy as np
 from random import expovariate, seed
 from .queues import Events, Trains
 from .train import Train
 from .config import conf, schema
+from .docs import *
 
 
 class Simulator(object):
@@ -22,6 +21,7 @@ class Simulator(object):
         self.stats = schema['stats']
 
     def start(self):
+        seed(25)
         while self.time <= self.limit:
             self.events.schedule('arrival',
                                  train=Train(self.time),
@@ -82,15 +82,6 @@ class Simulator(object):
         max_queue = self.stats['max_queue']
         self.stats['max_queue'] = max(trains_in_queue, max_queue)
 
-    def plot_histogram(self):
-        '''histogram'''
-        occurances = list(self.hogged_out.values())
-        plt.hist(occurances)
-        plt.xlabel("sequential hogouts")
-        plt.ylabel("number of trains")
-        plt.title("Hogging Out Frequences")
-        plt.show()
-
     def get_queue_stats(self):
         '''queue statistics'''
         times_in_queue = self.stats['queue'].values()
@@ -122,4 +113,3 @@ class Simulator(object):
     def analyze(self):
         self.get_stats()
         self.print_stats()
-        self.plot_histogram()

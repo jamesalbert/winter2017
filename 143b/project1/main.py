@@ -1,13 +1,18 @@
 #!/usr/bin/env python
 
+'''
+143B Project 1 Scheduler.
+
+Usage:
+  ./main.py --input=<file>
+  ./main.py --input=<file> --debug
+
+Options:
+  --debug  walk through execution step by step.
+'''
+
 from copy import deepcopy
-from colorama import Fore, init
-from json import dumps, loads
-from pprint import PrettyPrinter
-from pygments import highlight
-from pygments.lexers import JsonLexer
-from pygments.formatters import TerminalFormatter
-from pprint import pformat
+from docopt import docopt
 from yaml import dump, load
 import os
 import traceback
@@ -19,15 +24,17 @@ from exceptions import (
 
 
 class Process(object):
-    def __init__(self, pid, priority=1, status_type='ready'):
+    def __init__(self, pid, priority=1, status_type=None):
         self.pcb = {}
-        process_str = dump(conf['process'])
-        process_conf = load(process_str % {
-            'pid': pid,
-            'priority': priority,
-            'status_type': status_type
-        })
-        for attr, default in process_conf.items():
+        defaults = {
+            **deepcopy(conf['process']),
+            **{
+                'pid': pid,
+                'priority': priority,
+                'status_type': status_type
+            }
+        }
+        for attr, default in defaults.items():
             self.pcb[attr] = default
         self.dispatch = {
             'cr': self.create_proc,
@@ -37,89 +44,127 @@ class Process(object):
             'to': self.timeout,
         }
 
-    def request_resource(self, rid, quantity):
-        if self['pid'] == 'init':
-            raise IndexError
+    def check_validity(self, action, rid, quantity):
         resource = scheduler.resources[rid]
-        if resource['capacity'] < quantity:
-            raise IndexError  # not enough resource to allocate
-        elif resource['available'] < quantity:
-            self['status']['list'].append(resource['rid'])
-            scheduler.switch_state(self, 'running', 'blocked')
-            resource['waiting'].append((self['pid'], quantity))
+        if action == 'request':
+            if self['other'].get(rid, None):
+                quantity += self['other'][rid]
+            if self['status']['type'] == 'blocked' and \
+               rid in self['status']['list']:
+                quantity += self['status']
+            invalid = not (0 < quantity <= resource['capacity'])
         else:
-            resource['available'] -= quantity
-            if resource['available'] is 0:
-                resource['status'] = 'allocated'
-            self['other'][rid] = quantity
-        return conf['request_message'] % {
-            'rid': rid,
-            'quantity': quantity
-        }
-
-    def release_resource(self, rid, quantity=None):
-        if self['pid'] == 'init':
+            invalid = quantity > self['other'].get(rid, -1)
+        invalid = invalid and self.pcb['pid'] != 'init'
+        if self['pid'] == 'init' or invalid:
             raise IndexError
-        resource = scheduler.resources[rid]
-        if not self['other'].get(rid, None):
-            raise IndexError  # process hasn't requested resource
-        quantity = quantity or self['other'][rid]
-        print(f"freeing up {quantity}")
+        return resource
+
+    def check_capacity(self, resource, quantity):
+        return resource['available'] >= quantity
+
+    def block_process(self, resource, quantity):
+        self['status']['list'].append(resource['rid'])
+        scheduler.update(self, 'blocked')
+        resource['waiting'].append((self['pid'], quantity))
+        return self
+
+    def allocate_resource(self, resource, quantity):
+        rid = resource['rid']
+        resource['available'] -= quantity
+        if resource['available'] is 0:
+            resource['status'] = 'allocated'
+        self['other'][rid] = quantity + self['other'].get(rid, 0)
+        return self
+
+    def deallocate_resource(self, resource, quantity):
+        rid = resource['rid']
         resource['available'] += quantity
         del self['other'][rid]
         if resource['available'] > 0:
             resource['status'] = 'free'
-        for waiting in resource['waiting']:
-            pid, quantity = waiting
+        return self
+
+    def handle_waiting(self, resource, quantity):
+        rid = resource['rid']
+        for pid, quantity in resource['waiting']:
             if resource['available'] - quantity >= 0:
                 resource['available'] -= quantity
                 proc = scheduler.pid_table[pid]
-                print(proc['pid'])
                 proc['status'] = {
                     'type': 'ready',
                     'list': scheduler.procs['ready']
                 }
                 proc['other'][rid] = quantity
                 resource['waiting'].remove((proc['pid'], quantity))
-                scheduler.switch_state(proc, 'blocked', 'ready')
-        print(resource.rcb)
-        print(scheduler.resources[rid].rcb)
-        return conf['release_message'] % {
-            'rid': rid,
-            'quantity': quantity
-        }
+                scheduler.update(proc, 'ready')
+        return self
+
+    def request_resource(self, rid, quantity):
+        resource = self.check_validity('request', rid, quantity)
+        free = self.check_capacity(resource, quantity)
+        if free:
+            self.allocate_resource(resource, quantity)
+        else:
+            self.block_process(resource, quantity)
+        return self
+
+    def release_resource(self, rid, quantity):
+        resource = self.check_validity('release', rid, quantity)
+        self.deallocate_resource(resource, quantity)
+        self.handle_waiting(resource, quantity)
+        return self
+
+    def is_descendant(self, parent, supposed_child):
+        children = parent['creation_tree']['child']
+        for child in children:
+            if child is supposed_child:
+                return True
+            else:
+                is_grandchild = self.is_descendant(child, supposed_child)
+                if is_grandchild:
+                    return True
+        return False
 
     def destroy_proc(self, pid):
         proc = scheduler.pid_table.get(pid, None)
         if not proc:
-            raise Exception('pid {pid} not in pid table')
-        child = proc['creation_tree']['child']
-        if child:
-            self.destroy_proc(child[0]['pid'])
-        for rid in list(proc['other']):
-            proc.release_resource(rid)
+            raise IndexError
+        if self.is_descendant(proc, self):
+            raise IndexError
+        children = proc['creation_tree']['child']
+        for child in children:
+            if child['status']['type']:
+                self.destroy_proc(child['pid'])
+        for rid, quantity in deepcopy(proc['other']).items():
+            proc.release_resource(rid, quantity)
         state = proc['status']['type']
         proc['status']['type'] = None
         scheduler.procs[state].remove(proc)
-        return f"process: {pid} was destroyed"
+        del scheduler.pid_table[pid]
+        return self
 
     def create_proc(self, pid, priority):
+        if pid in scheduler.pid_table:
+            raise IndexError
+        if not (0 <= priority <= 2):
+            raise IndexError
+        if pid != 'init' and priority is 0:
+            raise IndexError
         proc = Process(pid, priority=priority)
         self['creation_tree']['child'].append(proc)
         proc['creation_tree']['parent'].append(self)
         scheduler.update(proc, 'ready')
         running = scheduler.get_running_proc()['pid']
-        response = conf['create_message'] % {
-            'pid': pid,
-            'running': running,
-            'priority': priority
-        }
         scheduler.pid_table[pid] = proc
-        return response
+        return self
 
     def timeout(self):
-        scheduler.switch_state(self, 'running', 'ready')
-        return f"timeout has been requested"
+        scheduler.update(self, 'ready')
+        return self
+
+    def isnt_blocked(self):
+        return self['status']['type'] != 'blocked'
 
     def __getitem__(self, key):
         return self.pcb[key]
@@ -148,71 +193,30 @@ class Resource(object):
 
 
 class Scheduler(object):
-    def __init__(self):
+    def __init__(self, args):
+        self.args = args
         self.initialize()
 
     def initialize(self):
         self.clean_state()
-        print('creating init process')
         for resource, quantity in conf['resources'].items():
             self.resources[resource] = Resource(resource, 'free', quantity)
         self.init = Process('init', 0, 'running')
         self.procs['running'].append(self.init)
-        self.event_log.append('init process has been created')
         self.schedule()
         return self
 
     def clean_state(self):
-        print('clearing settings')
         for attr, default in conf['scheduler'].items():
-            print(attr, default)
             setattr(self, attr, deepcopy(default))
-        print(self.procs['running'])
-        return self
-
-    def save_state(self):
-        global lines
-        save = conf['save']
-        save['lines'] = deepcopy(lines)
-        save['line'] = deepcopy(self.line_cache)
-        for rid, res in self.resources.items():
-            save['resources'][rid] = deepcopy(res)
-        for state in self.procs:
-            save['processes'][state] = list()
-            for proc in self.procs[state]:
-                save['processes'][state].append(deepcopy(proc))
-                save['pid_table'][proc['pid']] = save['processes'][state][-1]
-        self.saves.append(save)
-
-    def load_state(self):
-        global lines
-        save = self.saves.pop()
-        if not self.saves:
-            self.saves.append(save)
-        lines = deepcopy(save['lines'])
-        if len(self.event_log) > 1:
-            lines.insert(0, save['line'])
-            self.event_log.pop()
-        self.resources = dict()
-        self.pid_table = dict()
-        self.procs = dict()
-        for rid, res in save['resources'].items():
-            self.resources[rid] = deepcopy(res)
-        for state in save['processes']:
-            self.procs[state] = list()
-            for proc in save['processes'][state]:
-                self.procs[state].append(deepcopy(proc))
-                self.pid_table[proc['pid']] = self.procs[state][-1]
-        return self
-
-    def switch_state(self, proc, state, new_state):
-        self.procs[state].remove(proc)
-        scheduler.update(proc, new_state)
         return self
 
     def update(self, proc, state):
+        prev = proc['status']['type']
+        if prev and proc in self.procs[prev]:
+            self.procs[prev].remove(proc)
         proc['status']['type'] = state
-        scheduler.procs[state].append(proc)
+        self.procs[state].append(proc)
         return proc
 
     def get_highest_proc(self, state):
@@ -225,128 +229,72 @@ class Scheduler(object):
         return self.get_highest_proc('running')
 
     def preempt(self, preemtee, preemter):
-        self.switch_state(preemtee, 'ready', 'running')
-        if preemter and preemter['status']['type'] != 'blocked':
-            self.switch_state(preemter, 'running', 'ready')
-
-    def pretty_status(self):
-        status = dict()
-        for rid, res in self.resources.items():
-            status[rid] = f"{res['capacity'] - res['available']} allocated, \
-                            {res['available']} free"  # res['status']
-        for state in self.procs:
-            status[state] = dict()
-            for proc in self.procs[state]:
-                status[state][proc['pid']] = {
-                    'status': proc['status']['type'],
-                    'other': proc['other'],
-                    'priority': proc['priority']
-                }
-                print(proc['status'])
-                if proc['status']['type'] == 'blocked':
-                    status[state][proc['pid']]['status'] += \
-                        f" by {', '.join(proc['status']['list'])}"
-        return status
+        self.update(preemtee, 'running')
+        if preemter and preemter.isnt_blocked():
+            self.update(preemter, 'ready')
 
     def log(self, message):
-        output_file = open('output.txt', 'a')
-        output_file.write(message)
-        output_file.close()
-
-    def say(self, level, message=str()):
-        color = {
-            'info': Fore.WHITE,
-            'error': Fore.RED,
-            'warn': Fore.YELLOW
-        }[level]
-        print(color+str(message))
-
-    def pprint_color(self, obj):
-        try:
-            json = dumps(obj, indent=4, sort_keys=True)
-            print(highlight(json, JsonLexer(), TerminalFormatter()))
-        except:
-            pp.pprint(obj)
-            exit(1)
+        self.event_log.append(message)
 
     def schedule(self):
         running = self.get_running_proc()
         ready = self.get_highest_proc('ready')
         if not running:
-            self.switch_state(ready, 'ready', 'running')
+            self.update(ready, 'running')
         elif ready and \
             (running['priority'] < ready['priority'] or
              running['status']['type'] != 'running'):
             self.preempt(ready, running)
-        out = f"{self.get_running_proc()['pid']} "
-        self.log(f"{out}")
+        out = f"{self.get_running_proc()['pid']}"
+        self.log(out)
 
-    def parse_line(self):
-        line = self.line_cache
+    def write_log(self, newline=True):
+        newline = '\n' if newline else str()
+        output = ' '.join(self.event_log)
+        output_file = open(f"{self.args['--input']}.out", 'a')
+        output_file.write(f"{output}{newline}")
+        output_file.close()
+
+    def parse_line(self, line):
         if not line:
-            self.log('\n')
-            return 'end of session detected'
+            self.write_log()
+            return
         if line == 'init':
             raise NewSessionWarning
-        # out = f"{self.get_running_proc()['pid']} "
-        # self.log(out)
         command, *opts = line.split(' ')
         if command in ('cr', 'req', 'rel'):
             opts[1] = int(opts[1])
         running = self.get_running_proc()
         dispatch = running.dispatch.get(command, None)
         if dispatch:
-            response = dispatch(*opts)
+            dispatch(*opts)
         else:
-            response = f"unparsable line: {line}"
+            raise IndexError
         self.schedule()
-        return response
-
-    def print_status(self):
-        os.system('clear')
-        self.say('info', self.event_log[-1])
-        self.pprint_color(self.pretty_status())
-        self.say('info', f"parsing: {self.line_cache}")
 
     def parse_file(self):
-        self.event_log.append('init process has been created')
-        self.save_state()
         while lines:
-            self.line_cache = lines.pop(0)
-            self.print_status()
-            command = input('> ')
-            if command == 'b':
-                self.load_state()
-                continue
-            elif command == 'q':
-                break
-            self.save_state()
+            line = lines.pop(0)
+            print(f"parsing {line}")
             try:
-                self.event_log.append(self.parse_line())
+                self.parse_line(line)
+            except IndexError:
+                self.log('error')
+                continue
             except NewSessionWarning:
                 self.initialize()
-            except Exception as e:
-                self.say('info', conf['loop_error'] % self.__dict__)
-                self.say('error')
-                traceback.print_tb(e.__traceback__)
-                print(f"\n  {e}\n")
-                self.say('info', 'reverting back to previous state')
-                resp = input('[enter] to revert change, [c] to continue> ')
-                if resp == 'c':
-                    self.event_log.append('error occurred')
-                    self.log('error ')
-                    continue
-                self.load_state()
-                self.load_state()
-        self.log('\n')
+        self.write_log(newline=False)
 
 if __name__ == '__main__':
-    init()
-    pp = PrettyPrinter(indent=2)
-    with open('input.txt', 'r') as input_file:
+    args = docopt(__doc__)
+    try:
+        os.remove(f"{args['--input']}.out")
+    except FileNotFoundError:
+        pass
+    with open(args['--input'], 'r') as input_file:
         lines = [l.replace('\n', '')
                  for l in input_file.readlines()]
     with open('config.yaml', 'r') as yaml_file:
         conf = load(yaml_file)
-    scheduler = Scheduler()
+    scheduler = Scheduler(args)
     scheduler.parse_file()

@@ -31,6 +31,3 @@ de q
 to
 to
 req R1 2
-
-init
-cr x 1

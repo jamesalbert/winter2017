@@ -1,0 +1,35 @@
+function get_x_gradiant(src, col, row) {
+  get x gradiant using x kernel:
+    ((-1, 0, 1)
+     (-2, 0, 2)
+     (-1, 0, 1))
+}
+
+function get_y_gradiant(src, col, row) {
+  get y gradiant using y kernel:
+    ((1, 2, 1)
+     (0, 0, 0)
+     (-1, 2, -1))
+}
+
+function sobel(slice) {
+  src = slice[0][0]
+  for row in slice:
+    for col in row:
+      Gx = get_x_gradiant(src, col, row)
+      Gy = get_y_gradiant(src, col, row)
+      sum = |Gx| + |Gy|
+      sum = 255 if sum > 255 else sum
+      sum = 0 if sum < 0 else sum
+      distance at (row, col) = sum
+}
+
+img = readImage(filename)
+for row in img:
+  for col in row:
+    distance at (row, col) = 0
+
+slices = slice_image(img, parts=5)
+for slice in slices:
+  create_thread(sobel, slice)
+join_theads()
