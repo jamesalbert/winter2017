@@ -46,7 +46,7 @@ public class Simple extends Model {
         public void run() {
             while(true) {
                 add(new Job());
-                hold(rand.exponential(iarTime));
+                hold(rand.exponential(10));
             }
         }
     }

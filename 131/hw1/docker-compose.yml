@@ -1,0 +1,5 @@
+gdb:
+  image: jbert/gdb
+  volumes:
+    - .:/opt
+  command: /bin/bash

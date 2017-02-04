@@ -8,7 +8,7 @@ Usage:
   ./main.py --input=<file> --debug
 
 Options:
-  --input  file to read.
+  --input=<file>  file to read.
 '''
 
 from copy import deepcopy
@@ -131,6 +131,8 @@ class Process(object):
         if not proc:
             raise IndexError
         if self.is_descendant(proc, self):
+            raise IndexError
+        if not (self is proc or self.is_descendant(self, proc)):
             raise IndexError
         children = proc['creation_tree']['child']
         for child in children:
