@@ -23,33 +23,31 @@ void *PrintHello(struct State *state) {
   int id;
   id = state->id;
   while (state->philo->courses_left > 0) {
+    printf("philo %d is trying to get his fork\n", id);
     if (!state->forks[id]) {
       continue;
     }
     pthread_mutex_lock(&(state->locks[id]));
     state->forks[id] = false;
+    printf("philo %d got his fork\n", id);
     int here, next, prev;
     bool right, left;
     pthread_mutex_t *lock, *rlock, *llock;
     pthread_cond_t *cond, *rcond, *lcond;
-    // ((n % M) + M) % M
     next  = (id + 1) % state->num;
-    int n = id - 1;
-    int m = state->num;
-    prev  = ((n % m) + m) % m;
-    //prev  = (id - 1) % state->num;
+    prev  = (id - 1) % state->num;
+    printf("%d, %d, %d\n", state->forks[prev], state->forks[id], state->forks[next]);
     if (state->forks[next]) {
-      pthread_mutex_lock(&(state->locks[next]));
       state->forks[next] = false;
-      sleep(1);
+      pthread_mutex_lock(&(state->locks[next]));
       state->philo->courses_left -= 1;
       printf("philo %d has %d courses_left\n", id, state->philo->courses_left);
       pthread_mutex_unlock(&(state->locks[next]));
       state->forks[next] = true;
-    } else if (state->forks[prev]) {
-      pthread_mutex_lock(&(state->locks[prev]));
+    }
+    else if (state->forks[prev]) {
       state->forks[prev] = false;
-      sleep(1);
+      pthread_mutex_lock(&(state->locks[prev]));
       state->philo->courses_left -= 1;
       printf("philo %d has %d courses_left\n", id, state->philo->courses_left);
       pthread_mutex_unlock(&(state->locks[prev]));
@@ -71,7 +69,7 @@ int main(int argc, char *argv[]) {
   pthread_cond_t *conds;
   bool *forks;
   struct State *states;
-  philos = (struct Philosopher *)malloc(num_threads*sizeof(*philos));
+  philos = (struct Philosopher*)malloc(num_threads*sizeof(*philos));
   locks  = (pthread_mutex_t *)malloc(num_threads*sizeof(*locks));
   conds  = (pthread_cond_t *)malloc(num_threads*sizeof(*conds));
   forks = (bool *)malloc(num_threads*sizeof(*forks));
