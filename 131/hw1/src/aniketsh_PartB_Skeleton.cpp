@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <assert.h>
 #include <cstdlib>
 #include <cctype>
 #include <cmath>
@@ -37,15 +38,18 @@ void sobelify(int start) {
 /* ****************Change and add functions below ***************** */
 void dispatch_threads() {
   int i;
-  std::vector<std::thread> threads(num_threads);
+  std::vector<std::thread> threads;
   for (i = 0; i < num_threads; i++) {
-    std::thread t(sobelify, chunkSize * i);
-    threads.push_back(t);
+    threads.insert(threads.begin(), std::thread(sobelify, chunkSize * i));
   }
   for(std::vector<std::thread>::iterator it = threads.begin(); it != threads.end(); ++it) {
     /* std::cout << *it; ... */
-    (*it).join();
+    printf("%s\n", "here");
+    printf("%p\n", it);
+    it->join();
   }
+  printf("%s\n", "here");
+  return NULL;
 }
 
 /* ****************Need not to change the function below ***************** */
