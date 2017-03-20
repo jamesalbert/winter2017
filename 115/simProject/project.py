@@ -89,12 +89,11 @@ if __name__ == '__main__':
         patches.Patch(color='red', label='sample data'),
         patches.Patch(color='blue', label='simulated data')
     ])
-    # plt.show()
     anim.save('simulation.mp4', fps=5, extra_args=['-vcodec', 'libx264'])
+    plt.show()
     print('simulation.mp4 was created, run `open simulation.mp4`')
 
     # plot regression curves
-    del sim
     plt.title('enrollees with pre-existing conditions over insurers')
     plt.ylabel('number of enrollees')
     plt.xlabel('number of insurers')
@@ -107,7 +106,7 @@ if __name__ == '__main__':
     plt.legend(handles=[
         patches.Patch(color='green', label='linear regression'),
         patches.Patch(color='cyan', label='exponential regression'),
-        patches.Patch(color='purple', label='polynomail regression')
+        patches.Patch(color='purple', label='polynomial regression')
     ])
     plt.show()
 

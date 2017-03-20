@@ -226,8 +226,7 @@ $$c = 0.95$$
 $$t_{c} = 0.8262$$
 95% confidence interval for $\mu_{pop}$ =
 $$[\mu_{pop} - t_c \times \frac{s}{\sqrt{n}}, \mu_{pop} + t_c \times \frac{s}{\sqrt{n}}] =$$
-$$[4.93 - 0.8262 \times 0.0796596052, 4.93 + 0.8262 \times 0.0796596052] =$$
-$$[4.86418523, 4.99581477]$$
+$$[4.93 - 0.8262 \times 0.0796596052, 4.93 + 0.8262 \times 0.0796596052] = [4.86418523, 4.99581477]$$
 
 I ran my simulation once first and got an initial mean of 4.95. I proceeded to run it 100 times and got an average mean of 4.96. I can safely say I'm 95% confident in my simulated plots results. Now if I was a policy maker, I would use this simulation to introduce experimental variables to observe the possible changes that may take place. I've included `simulation.mp4` which shows the convergence between the sample and simulated data.
 
