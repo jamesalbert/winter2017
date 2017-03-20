@@ -1,10 +1,14 @@
-from json import dumps, loads
+try:
+    from json import dumps, loads
 
-import matplotlib.pyplot as plt
-import numpy as np
-from matplotlib import patches
-from matplotlib.animation import FuncAnimation
-from matplotlib.ticker import NullFormatter
+    import matplotlib.pyplot as plt
+    import numpy as np
+    from matplotlib import patches
+    from matplotlib.animation import FuncAnimation
+    from matplotlib.ticker import NullFormatter
+except ImportError:
+    print('run `pip install -r requirements.txt`')
+    exit(1)
 
 
 class Regression(object):
@@ -90,7 +94,7 @@ if __name__ == '__main__':
         patches.Patch(color='blue', label='simulated data')
     ])
     anim.save('simulation.mp4', fps=5, extra_args=['-vcodec', 'libx264'])
-    plt.show()
+    # plt.show()
     print('simulation.mp4 was created, run `open simulation.mp4`')
 
     # plot regression curves
