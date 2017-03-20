@@ -45,7 +45,9 @@ class Process(object):
         }
 
     def check_validity(self, action, rid, quantity):
-        resource = scheduler.resources[rid]
+        resource = scheduler.resources.get(rid, None)
+        if not resource:
+            raise IndexError;
         if action == 'request':
             if self['other'].get(rid, None):
                 quantity += self['other'][rid]
@@ -253,7 +255,9 @@ class Scheduler(object):
     def write_log(self, newline=True):
         newline = '\n' if newline else str()
         output = ' '.join(self.event_log)
-        output_file = open(f"{self.args['--input']}.out", 'a')
+        filename = self.args['--input'].split('/')[0:-1]
+        out_path = f"{'/'.join(filename)}/16004325.txt"
+        output_file = open(f"{out_path}", 'a')
         output_file.write(f"{output}{newline}")
         output_file.close()
 

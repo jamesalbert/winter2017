@@ -2,7 +2,6 @@ from random import expovariate, seed
 from .queues import Events, Trains
 from .train import Train
 from .config import conf, schema
-from .docs import *
 
 
 class Simulator(object):

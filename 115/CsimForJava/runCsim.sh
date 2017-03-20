@@ -7,5 +7,5 @@ function ctrl_c() {
 }
 
 javac $1.java
-java $1
+java $1 $2 $3
 rm -f *.class

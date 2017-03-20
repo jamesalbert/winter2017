@@ -1,0 +1,2 @@
+mpic++ -o hello -O2 super_simple_mpi.cpp
+mpirun -np 4 ./hello

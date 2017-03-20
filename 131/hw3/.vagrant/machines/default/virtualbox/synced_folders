@@ -1,0 +1,1 @@
+{"rsync":{"/vagrant":{"type":"rsync","guestpath":"/vagrant","hostpath":"/Users/jbert/Development/winter2017/131/hw3","disabled":false,"__vagrantfile":true,"owner":"vagrant","group":"vagrant"}},"virtualbox":{"/home/vagrant/hw3":{"guestpath":"/home/vagrant/hw3","hostpath":"/Users/jbert/Development/winter2017/131/hw3","disabled":false,"__vagrantfile":true}}}

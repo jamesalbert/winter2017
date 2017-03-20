@@ -1,0 +1,61 @@
+int gen_x_grad(int x, int y) {
+    return inputImage[y-1][x-1] +
+           2*inputImage[y][x-1] +
+           inputImage[y+1][x-1] -
+           inputImage[y-1][x+1] -
+           2*inputImage[y][x+1] -
+           inputImage[y+1][x+1];
+}
+
+int gen_y_grad(int x, int y) {
+    return inputImage[y-1][x-1] +
+           2*inputImage[y-1][x] +
+           inputImage[y-1][x+1] -
+           inputImage[y+1][x-1] -
+           2*inputImage[y+1][x] -
+           inputImage[y+1][x+1];
+}
+
+void sobelify(int start) {
+  int i, j, gx, gy, sum;
+  while (currentChunk < image_height) {
+    printf("%d < %d\n", currentChunk, image_height);
+    lock currentChunk using mpi_mutex
+    currentChunk = start + chunkSize;
+    unlock currentChunk using mpi_mutex
+    for (i = start; i < start + chunkSize - 1; i += 3) {
+      for (j = 1; j < image_width - 1; j += 3) {
+        gx = gen_x_grad(j, i);
+        gy = gen_y_grad(j, i);
+        sum = abs(gx) + abs(gy);
+        sum = sum > 255 ? 255 : sum;
+        sum = sum < 0 ? 0 : sum;
+        outputImage[i][j] = outputImage[i][j+1] = outputImage[i][j+2] =
+        outputImage[i+1][j] = outputImage[i+1][j+1] = outputImage[i+1][j+2] =
+        outputImage[i+2][j] = outputImage[i+2][j+1] = outputImage[i+2][j+2] = sum;
+      }
+    }
+    start = currentChunk;
+  }
+}
+
+
+img = readImage(filename)
+img_chunk = list()
+new_img = ImageType
+bits = image2bits(img, parts=5)
+MPI_Init(&argc, &argv)
+vars: procid, numprocs
+MPI_Comm_rank(MPI_WORLD, &procid)
+MPI_Comm_size(MPI_WORLD, &numprocs)
+if (procid == 0) {
+  for chunk in chunkify(bits) {
+    img_chunk.append(sobelify(chunk))
+  }
+  for i in range(numprocs) {
+      MPI_Send(img_chunk[i], len(lines), MPI_INT, i, 1, MPI_COMM_WORLD);
+  }
+  MPI_Recv(new_img, len(lines), MPI_INT, 0, 1, MPI_COMM_WORLD, &stat)
+}
+write(write_image(new_img))
+MPI_Finalize()

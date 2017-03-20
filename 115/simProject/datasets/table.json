@@ -1,0 +1,346 @@
+{
+    "Alabama": {
+        "(x - x_mean)*(y - y_mean)": 99752.78,
+        "(x - x_mean)^2": 9.3,
+        "x": 2.0,
+        "x - x_mean": -3.05,
+        "y": 18230.0,
+        "y - y_mean": -32705.83
+    },
+    "Alaska": {
+        "(x - x_mean)*(y - y_mean)": 150956.18,
+        "(x - x_mean)^2": 9.3,
+        "x": 2.0,
+        "x - x_mean": -3.05,
+        "y": 1442.0,
+        "y - y_mean": -49493.83
+    },
+    "Arizona": {
+        "(x - x_mean)*(y - y_mean)": 160215.0,
+        "(x - x_mean)^2": 8.7,
+        "x": 8.0,
+        "x - x_mean": 2.95,
+        "y": 105246.0,
+        "y - y_mean": 54310.17
+    },
+    "Arkansas": {
+        "(x - x_mean)*(y - y_mean)": 62352.45,
+        "(x - x_mean)^2": 4.2,
+        "x": 3.0,
+        "x - x_mean": -2.05,
+        "y": 20520.0,
+        "y - y_mean": -30415.83
+    },
+    "Colorado": {
+        "(x - x_mean)*(y - y_mean)": -70690.11,
+        "(x - x_mean)^2": 24.5,
+        "x": 10.0,
+        "x - x_mean": 4.95,
+        "y": 36655.0,
+        "y - y_mean": -14280.83
+    },
+    "Connecticut": {
+        "(x - x_mean)*(y - y_mean)": 77930.4,
+        "(x - x_mean)^2": 4.2,
+        "x": 3.0,
+        "x - x_mean": -2.05,
+        "y": 12921.0,
+        "y - y_mean": -38014.83
+    },
+    "Delaware": {
+        "(x - x_mean)*(y - y_mean)": 133366.83,
+        "(x - x_mean)^2": 9.3,
+        "x": 2.0,
+        "x - x_mean": -3.05,
+        "y": 7209.0,
+        "y - y_mean": -43726.83
+    },
+    "Georgia": {
+        "(x - x_mean)*(y - y_mean)": -1503.91,
+        "(x - x_mean)^2": 0.0,
+        "x": 5.0,
+        "x - x_mean": -0.05,
+        "y": 81014.0,
+        "y - y_mean": 30078.16
+    },
+    "Idaho": {
+        "(x - x_mean)*(y - y_mean)": 35857.32,
+        "(x - x_mean)^2": 1.1,
+        "x": 4.0,
+        "x - x_mean": -1.05,
+        "y": 16786.0,
+        "y - y_mean": -34149.83
+    },
+    "Illinois": {
+        "(x - x_mean)*(y - y_mean)": -1697.26,
+        "(x - x_mean)^2": 0.0,
+        "x": 5.0,
+        "x - x_mean": -0.05,
+        "y": 84881.0,
+        "y - y_mean": 33945.17
+    },
+    "Indiana": {
+        "(x - x_mean)*(y - y_mean)": 9729.12,
+        "(x - x_mean)^2": 1.1,
+        "x": 4.0,
+        "x - x_mean": -1.05,
+        "y": 41670.0,
+        "y - y_mean": -9265.83
+    },
+    "Iowa": {
+        "(x - x_mean)*(y - y_mean)": 43261.92,
+        "(x - x_mean)^2": 1.1,
+        "x": 4.0,
+        "x - x_mean": -1.05,
+        "y": 9734.0,
+        "y - y_mean": -41201.83
+    },
+    "Kansas": {
+        "(x - x_mean)*(y - y_mean)": 78385.5,
+        "(x - x_mean)^2": 4.2,
+        "x": 3.0,
+        "x - x_mean": -2.05,
+        "y": 12699.0,
+        "y - y_mean": -38236.83
+    },
+    "Kentucky": {
+        "(x - x_mean)*(y - y_mean)": 44351.4,
+        "(x - x_mean)^2": 4.2,
+        "x": 3.0,
+        "x - x_mean": -2.05,
+        "y": 29301.0,
+        "y - y_mean": -21634.83
+    },
+    "Louisiana": {
+        "(x - x_mean)*(y - y_mean)": 18597.42,
+        "(x - x_mean)^2": 1.1,
+        "x": 4.0,
+        "x - x_mean": -1.05,
+        "y": 33224.0,
+        "y - y_mean": -17711.83
+    },
+    "Maine": {
+        "(x - x_mean)*(y - y_mean)": 151096.48,
+        "(x - x_mean)^2": 9.3,
+        "x": 2.0,
+        "x - x_mean": -3.05,
+        "y": 1396.0,
+        "y - y_mean": -49539.83
+    },
+    "Maryland": {
+        "(x - x_mean)*(y - y_mean)": 15479.97,
+        "(x - x_mean)^2": 1.1,
+        "x": 4.0,
+        "x - x_mean": -1.05,
+        "y": 36193.0,
+        "y - y_mean": -14742.83
+    },
+    "Michigan": {
+        "(x - x_mean)*(y - y_mean)": -14389.18,
+        "(x - x_mean)^2": 15.6,
+        "x": 9.0,
+        "x - x_mean": 3.95,
+        "y": 47293.0,
+        "y - y_mean": -3642.83
+    },
+    "Minnesota": {
+        "(x - x_mean)*(y - y_mean)": 1678.04,
+        "(x - x_mean)^2": 0.0,
+        "x": 5.0,
+        "x - x_mean": -0.05,
+        "y": 17375.0,
+        "y - y_mean": -33560.83
+    },
+    "Mississippi": {
+        "(x - x_mean)*(y - y_mean)": 128752.18,
+        "(x - x_mean)^2": 9.3,
+        "x": 2.0,
+        "x - x_mean": -3.05,
+        "y": 8722.0,
+        "y - y_mean": -42213.83
+    },
+    "Montana": {
+        "(x - x_mean)*(y - y_mean)": 84016.85,
+        "(x - x_mean)^2": 4.2,
+        "x": 3.0,
+        "x - x_mean": -2.05,
+        "y": 9952.0,
+        "y - y_mean": -40983.83
+    },
+    "Nebraska": {
+        "(x - x_mean)*(y - y_mean)": 43545.42,
+        "(x - x_mean)^2": 1.1,
+        "x": 4.0,
+        "x - x_mean": -1.05,
+        "y": 9464.0,
+        "y - y_mean": -41471.83
+    },
+    "Nevada": {
+        "(x - x_mean)*(y - y_mean)": 21905.97,
+        "(x - x_mean)^2": 1.1,
+        "x": 4.0,
+        "x - x_mean": -1.05,
+        "y": 30073.0,
+        "y - y_mean": -20862.83
+    },
+    "New Hampshire": {
+        "(x - x_mean)*(y - y_mean)": 145803.36,
+        "(x - x_mean)^2": 16.4,
+        "x": 1.0,
+        "x - x_mean": -4.05,
+        "y": 14935.0,
+        "y - y_mean": -36000.83
+    },
+    "New Jersey": {
+        "(x - x_mean)*(y - y_mean)": 33236.3,
+        "(x - x_mean)^2": 4.2,
+        "x": 3.0,
+        "x - x_mean": -2.05,
+        "y": 34723.0,
+        "y - y_mean": -16212.83
+    },
+    "New Mexico": {
+        "(x - x_mean)*(y - y_mean)": 14842.62,
+        "(x - x_mean)^2": 1.1,
+        "x": 4.0,
+        "x - x_mean": -1.05,
+        "y": 36800.0,
+        "y - y_mean": -14135.83
+    },
+    "New York": {
+        "(x - x_mean)*(y - y_mean)": 734878.26,
+        "(x - x_mean)^2": 119.9,
+        "x": 16.0,
+        "x - x_mean": 10.95,
+        "y": 118048.0,
+        "y - y_mean": 67112.17
+    },
+    "North Carolina": {
+        "(x - x_mean)*(y - y_mean)": -226545.37,
+        "(x - x_mean)^2": 9.3,
+        "x": 2.0,
+        "x - x_mean": -3.05,
+        "y": 125213.0,
+        "y - y_mean": 74277.17
+    },
+    "North Dakota": {
+        "(x - x_mean)*(y - y_mean)": 100174.95,
+        "(x - x_mean)^2": 4.2,
+        "x": 3.0,
+        "x - x_mean": -2.05,
+        "y": 2070.0,
+        "y - y_mean": -48865.83
+    },
+    "Ohio": {
+        "(x - x_mean)*(y - y_mean)": 221204.16,
+        "(x - x_mean)^2": 35.4,
+        "x": 11.0,
+        "x - x_mean": 5.95,
+        "y": 88113.0,
+        "y - y_mean": 37177.17
+    },
+    "Oklahoma": {
+        "(x - x_mean)*(y - y_mean)": 27115.02,
+        "(x - x_mean)^2": 1.1,
+        "x": 4.0,
+        "x - x_mean": -1.05,
+        "y": 25112.0,
+        "y - y_mean": -25823.83
+    },
+    "Oregon": {
+        "(x - x_mean)*(y - y_mean)": -50062.29,
+        "(x - x_mean)^2": 35.4,
+        "x": 11.0,
+        "x - x_mean": 5.95,
+        "y": 42522.0,
+        "y - y_mean": -8413.83
+    },
+    "Pennsylvania": {
+        "(x - x_mean)*(y - y_mean)": 256809.48,
+        "(x - x_mean)^2": 3.8,
+        "x": 7.0,
+        "x - x_mean": 1.95,
+        "y": 182633.0,
+        "y - y_mean": 131697.17
+    },
+    "Rhode Island": {
+        "(x - x_mean)*(y - y_mean)": 140500.78,
+        "(x - x_mean)^2": 9.3,
+        "x": 2.0,
+        "x - x_mean": -3.05,
+        "y": 4870.0,
+        "y - y_mean": -46065.83
+    },
+    "South Carolina": {
+        "(x - x_mean)*(y - y_mean)": 6715.45,
+        "(x - x_mean)^2": 4.2,
+        "x": 3.0,
+        "x - x_mean": -2.05,
+        "y": 47660.0,
+        "y - y_mean": -3275.83
+    },
+    "South Dakota": {
+        "(x - x_mean)*(y - y_mean)": 93471.45,
+        "(x - x_mean)^2": 4.2,
+        "x": 3.0,
+        "x - x_mean": -2.05,
+        "y": 5340.0,
+        "y - y_mean": -45595.83
+    },
+    "Tennessee": {
+        "(x - x_mean)*(y - y_mean)": 7627.02,
+        "(x - x_mean)^2": 1.1,
+        "x": 4.0,
+        "x - x_mean": -1.05,
+        "y": 43672.0,
+        "y - y_mean": -7263.83
+    },
+    "Texas": {
+        "(x - x_mean)*(y - y_mean)": 946884.01,
+        "(x - x_mean)^2": 35.4,
+        "x": 11.0,
+        "x - x_mean": 5.95,
+        "y": 210076.0,
+        "y - y_mean": 159140.17
+    },
+    "Utah": {
+        "(x - x_mean)*(y - y_mean)": -22170.94,
+        "(x - x_mean)^2": 0.9,
+        "x": 6.0,
+        "x - x_mean": 0.95,
+        "y": 27598.0,
+        "y - y_mean": -23337.83
+    },
+    "Virginia": {
+        "(x - x_mean)*(y - y_mean)": -585.96,
+        "(x - x_mean)^2": 0.0,
+        "x": 5.0,
+        "x - x_mean": -0.05,
+        "y": 62655.0,
+        "y - y_mean": 11719.17
+    },
+    "Washington": {
+        "(x - x_mean)*(y - y_mean)": -53107.92,
+        "(x - x_mean)^2": 3.8,
+        "x": 7.0,
+        "x - x_mean": 1.95,
+        "y": 23701.0,
+        "y - y_mean": -27234.83
+    },
+    "West Virginia": {
+        "(x - x_mean)*(y - y_mean)": 189316.56,
+        "(x - x_mean)^2": 16.4,
+        "x": 1.0,
+        "x - x_mean": -4.05,
+        "y": 4191.0,
+        "y - y_mean": -46744.83
+    },
+    "Wisconsin": {
+        "(x - x_mean)*(y - y_mean)": 18834.9,
+        "(x - x_mean)^2": 63.2,
+        "x": 13.0,
+        "x - x_mean": 7.95,
+        "y": 53305.0,
+        "y - y_mean": 2369.17
+    }
+}

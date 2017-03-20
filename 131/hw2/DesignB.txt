@@ -1,0 +1,49 @@
+function main(argc, argv) {
+  read input file
+  slurp input file lines into array, Lines
+  wordcount = {}
+  wc = {}
+  MPI_Init(&argc, &argv)
+  vars: procid, numprocs
+  MPI_Comm_rank(MPI_WORLD, &procid)
+  MPI_Comm_size(MPI_WORLD, &numprocs)
+  MPI_Status stat;
+
+  index = 0
+  start = MPI_Wtime();
+
+  int numtasks, rank, dest, source, rc, count, tag=1;
+  char inmsg, outmsg='x';
+
+
+  if( argv[3] == "b1" ) {
+    if (procid == 0) {
+      wc = {}
+      for line in Lines {
+        wordcount = {}
+        for word in line {
+          wordcount[word] += 1
+          rc = MPI_Reduce(wordcount, wc, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD)
+        }
+      }
+    }
+  } else {
+    if (procid == 0) {
+      for line in Lines {
+        for word in line {
+          wc[word] += 1
+        }
+      }
+      for i in range(numprocs) {
+          MPI_Send(wc, len(lines), MPI_INT, i, 1, MPI_COMM_WORLD);
+      }
+      MPI_Recv(wordcount, len(lines), MPI_INT, 0, 1, MPI_COMM_WORLD, &stat)
+    }
+  }
+
+  if(procid == 0) {
+    end=MPI_Wtime();
+    print "Time: " << ((double)end-start);
+  }
+  MPI_Finalize()
+}
